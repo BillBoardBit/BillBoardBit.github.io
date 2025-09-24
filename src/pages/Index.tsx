@@ -13,17 +13,8 @@ const Index = () => {
       <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Hero Section */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold tracking-tight">
-              Nostr Billboard for Donations
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Support these creators by sending them zaps and messages
-            </p>
-          </div>
-
-          {/* Billboard Manager - Only for logged in users */}
+ 
+           {/* Billboard Manager - Only for logged in users */}
           <BillboardManager />
 
           {/* Billboard List */}

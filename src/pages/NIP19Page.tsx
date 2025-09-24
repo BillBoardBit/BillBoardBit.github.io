@@ -46,13 +46,21 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex items-center">
+          <div className="flex items-center justify-between">
             <Button variant="outline" size="sm" asChild>
               <a href="/">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Billboard
               </a>
             </Button>
+            
+            {user && (
+              <ZapButton 
+                target={zapTarget} 
+                className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-lg"
+                showCount={false}
+              />
+            )}
           </div>
 
           {/* Profile Card */}
@@ -75,32 +83,6 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
                  </div>
               </div>
             </CardHeader>
-          </Card>
-
-          {/* Call to Action */}
-          <Card className="bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-xl font-semibold mb-2">Support {displayName}</h3>
-              {user ? (
-                <>
-                  <p className="text-muted-foreground mb-4">
-                    Send a Lightning zap with a message to show your support
-                  </p>
-                  <ZapButton 
-                    target={zapTarget} 
-                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 text-lg mx-auto w-fit min-w-64"
-                    showCount={false}
-                  />
-                </>
-              ) : (
-                <>
-                  <p className="text-muted-foreground mb-4">
-                    Login to send zaps and messages
-                  </p>
-                  <LoginArea className="flex justify-center" />
-                </>
-              )}
-            </CardContent>
           </Card>
 
           <div className="grid gap-6 lg:grid-cols-3">
