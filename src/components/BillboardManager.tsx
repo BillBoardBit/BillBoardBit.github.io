@@ -3,12 +3,12 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthor } from '@/hooks/useAuthor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-// Badge import removed as it's not used
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { LoginArea } from '@/components/auth/LoginArea';
-import { Plus, Minus, ExternalLink } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { useState } from 'react';
 import { genUserName } from '@/lib/genUserName';
 import { nip19 } from 'nostr-tools';
@@ -155,35 +155,31 @@ function BillboardItem({ entry }: BillboardItemProps) {
 
   const displayName = content.displayName || metadata?.name || genUserName(entry.pubkey);
   const npub = content.npub;
+  const profileImage = metadata?.picture;
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="font-medium">{displayName}</h3>
-            <p className="text-sm text-muted-foreground font-mono">
-              {npub.slice(0, 16)}...{npub.slice(-8)}
-            </p>
-            {content.addedAt && (
-              <p className="text-xs text-muted-foreground mt-1">
-                Added {new Date(content.addedAt * 1000).toLocaleDateString()}
-              </p>
-            )}
+    <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer">
+      <a href={`/${npub}`} className="block">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center text-center space-y-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={profileImage} alt={displayName} />
+              <AvatarFallback className="text-lg">
+                {displayName.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            
+            <div className="space-y-2">
+              <h3 className="font-semibold text-lg">{displayName}</h3>
+              {content.addedAt && (
+                <p className="text-sm text-muted-foreground">
+                  Added {new Date(content.addedAt * 1000).toLocaleDateString()}
+                </p>
+              )}
+            </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className="flex items-center space-x-2"
-          >
-            <a href={`/${npub}`}>
-              <ExternalLink className="w-4 h-4" />
-              <span>View</span>
-            </a>
-          </Button>
-        </div>
-      </CardContent>
+        </CardContent>
+      </a>
     </Card>
   );
 }
@@ -193,14 +189,16 @@ export function BillboardList() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {[...Array(8)].map((_, i) => (
           <Card key={i}>
-            <CardContent className="p-4">
-              <div className="space-y-2">
-                <div className="h-5 bg-gray-200 rounded animate-pulse" />
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
-                <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2" />
+            <CardContent className="p-6">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse" />
+                <div className="space-y-2 w-full">
+                  <div className="h-5 bg-gray-200 rounded animate-pulse w-3/4 mx-auto" />
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2 mx-auto" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -223,7 +221,7 @@ export function BillboardList() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {billboardEntries.map((entry) => (
         <BillboardItem key={entry.id} entry={entry} />
       ))}

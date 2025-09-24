@@ -1,7 +1,5 @@
 import { useSeoMeta } from '@unhead/react';
 import { BillboardManager, BillboardList } from '@/components/BillboardManager';
-// No unused imports needed for this page
-import { Separator } from '@/components/ui/separator';
 
 const Index = () => {
   useSeoMeta({
@@ -19,25 +17,15 @@ const Index = () => {
               BillBoardBit
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              A simple billboard where you can list yourself to receive zaps and messages from the Nostr community
+              Support these creators by sending them zaps and messages
             </p>
           </div>
 
-          {/* Billboard Manager */}
+          {/* Billboard Manager - Only for logged in users */}
           <BillboardManager />
 
-          <Separator />
-
           {/* Billboard List */}
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-semibold">Billboard</h2>
-              <p className="text-muted-foreground">
-                Support these creators by sending them zaps and messages
-              </p>
-            </div>
-            <BillboardList />
-          </div>
+          <BillboardList />
         </div>
       </div>
     </div>

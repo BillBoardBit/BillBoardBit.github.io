@@ -20,6 +20,17 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
   const about = metadata?.about;
   const profileImage = metadata?.picture;
 
+  // Create a simple event for zapping if no author event exists
+  const zapTarget = author.data?.event || {
+    id: `dummy-${pubkey}`,
+    pubkey,
+    kind: 0,
+    content: JSON.stringify(metadata || {}),
+    created_at: Math.floor(Date.now() / 1000),
+    tags: [],
+    sig: ''
+  };
+
   useSeoMeta({
     title: `${displayName} - BillBoardBit`,
     description: about || `Support ${displayName} with zaps and messages on Nostr`,
@@ -62,21 +73,19 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
           </Card>
 
           {/* Call to Action - Send Zap */}
-          {author.data?.event && (
-            <Card className="bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
-              <CardContent className="p-6 text-center">
-                <h3 className="text-xl font-semibold mb-2">Support {displayName}</h3>
-                <p className="text-muted-foreground mb-4">
-                  Send a Lightning zap with a message to show your support
-                </p>
-                <ZapButton 
-                  target={author.data.event} 
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 text-lg mx-auto w-fit min-w-64"
-                  showCount={false}
-                />
-              </CardContent>
-            </Card>
-          )}
+          <Card className="bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
+            <CardContent className="p-6 text-center">
+              <h3 className="text-xl font-semibold mb-2">Support {displayName}</h3>
+              <p className="text-muted-foreground mb-4">
+                Send a Lightning zap with a message to show your support
+              </p>
+              <ZapButton 
+                target={zapTarget} 
+                className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 text-lg mx-auto w-fit min-w-64"
+                showCount={false}
+              />
+            </CardContent>
+          </Card>
 
           <div className="grid gap-6 lg:grid-cols-3">
             {/* QR Code */}
