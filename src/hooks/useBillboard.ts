@@ -5,7 +5,7 @@ import { useNostrPublish } from './useNostrPublish';
 // NostrEvent type import removed as it's not used directly
 
 /**
- * Hook to manage the billboard list using kind 30078 events with tag "BillBoardBit"
+ * Hook to manage the billboard list using kind 30078 events with tag "BillboardBit"
  */
 export function useBillboard() {
   const { nostr } = useNostr();
@@ -21,7 +21,7 @@ export function useBillboard() {
       const events = await nostr.query([
         {
           kinds: [30078],
-          '#t': ['BillBoardBit'],
+          '#t': ['BillboardBit'],
           limit: 1000,
         }
       ], { signal });
@@ -57,7 +57,7 @@ export function useBillboard() {
         }),
         tags: [
           ['d', user.pubkey], // Use pubkey as identifier
-          ['t', 'BillBoardBit'],
+          ['t', 'BillboardBit'],
           ['alt', 'Billboard entry for collecting donations'],
         ],
       });
@@ -79,7 +79,7 @@ export function useBillboard() {
         content: '',
         tags: [
           ['d', user.pubkey],
-          ['t', 'BillBoardBit'],
+          ['t', 'BillboardBit'],
           ['alt', 'Removed billboard entry'],
         ],
       });

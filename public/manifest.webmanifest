@@ -1,6 +1,6 @@
 {
-  "name": "BillBoardBit",
-  "short_name": "BillBoardBit",
+  "name": "BillboardBit",
+  "short_name": "BillboardBit",
   "description": "A simple billboard where users can list themselves to receive zaps and messages on Nostr",
   "start_url": "/",
   "display": "standalone",

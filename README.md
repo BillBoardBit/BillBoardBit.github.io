@@ -1,4 +1,4 @@
-# BillBoardBit
+# BillboardBit
 
 A simple, minimal billboard application built on Nostr where users can list themselves to receive zaps and messages from the community.
 
@@ -44,7 +44,7 @@ npm run build
 ## Nostr Integration
 
 This application uses:
-- **Kind 30078**: Billboard entries with tag "BillBoardBit"
+- **Kind 30078**: Billboard entries with tag "BillboardBit"
 - **Kind 9735**: Zap receipts for displaying received payments
 - **NIP-19**: Profile links and addresses
 - **NIP-57**: Lightning Network zaps

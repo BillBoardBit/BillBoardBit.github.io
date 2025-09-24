@@ -251,7 +251,7 @@ export function ZapDialog({ target, children, className }: ZapDialogProps) {
 
   useEffect(() => {
     if (target) {
-      setComment('Zapped with BillBoardBit!');
+      setComment('Zapped with BillboardBit!');
     }
   }, [target]);
 
