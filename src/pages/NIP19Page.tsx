@@ -8,7 +8,7 @@ import { ZapButton } from '@/components/ZapButton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { genUserName } from '@/lib/genUserName';
 import NotFound from './NotFound';
 
@@ -19,7 +19,6 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
   const displayName = metadata?.name || genUserName(pubkey);
   const about = metadata?.about;
   const profileImage = metadata?.picture;
-  const website = metadata?.website;
 
   useSeoMeta({
     title: `${displayName} - BillBoardBit`,
@@ -55,28 +54,9 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
                   {about && (
                     <p className="text-muted-foreground mt-2">{about}</p>
                   )}
-                  <div className="flex flex-wrap items-center gap-2 mt-3">
-                    <p className="text-sm text-muted-foreground font-mono">
-                      {npub.slice(0, 20)}...{npub.slice(-8)}
-                    </p>
-                    {website && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a 
-                          href={website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center space-x-1"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          <span>Website</span>
-                        </a>
-                      </Button>
-                    )}
-                  </div>
                 </div>
                 <div className="flex flex-col items-center space-y-3">
-                  {/* دکمه بالایی حذف شد */}
-                </div>
+                 </div>
               </div>
             </CardHeader>
           </Card>

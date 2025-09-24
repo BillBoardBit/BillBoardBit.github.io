@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useInView } from 'react-intersection-observer';
 import { useUserZaps, type ZapWithMessage } from '@/hooks/useUserZaps';
 import { useAuthor } from '@/hooks/useAuthor';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -54,7 +56,27 @@ function ZapItem({ zap }: { zap: ZapWithMessage }) {
 }
 
 export function ZapList({ pubkey, className }: ZapListProps) {
-  const { data: zaps = [], isLoading, error } = useUserZaps(pubkey);
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetchingNextPage 
+  } = useUserZaps(pubkey);
+
+  // Intersection observer for infinite scroll
+  const { ref, inView } = useInView();
+
+  // Flatten all pages into a single array
+  const zaps = data?.pages.flat() || [];
+
+  // Auto-fetch next page when in view
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (isLoading) {
     return (
@@ -123,6 +145,36 @@ export function ZapList({ pubkey, className }: ZapListProps) {
         {zaps.map((zap) => (
           <ZapItem key={zap.id} zap={zap} />
         ))}
+        
+        {/* Infinite scroll trigger */}
+        {hasNextPage && (
+          <div ref={ref} className="py-4">
+            {isFetchingNextPage ? (
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Skeleton className="w-8 h-8 rounded-full" />
+                      <div className="space-y-1">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4 mt-1" />
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="text-center text-muted-foreground">
+                Scroll to load more zaps...
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

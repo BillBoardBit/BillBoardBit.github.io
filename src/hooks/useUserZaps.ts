@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { useNostr } from '@nostrify/react';
-import type { NostrEvent } from '@nostrify/nostrify';
+import type { NostrEvent, NostrFilter } from '@nostrify/nostrify';
 import { extractZapAmount } from '@/lib/zapUtils';
 
 export interface ZapWithMessage {
@@ -19,22 +19,27 @@ export interface ZapWithMessage {
 export function useUserZaps(pubkey: string | undefined) {
   const { nostr } = useNostr();
 
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ['user-zaps', pubkey],
     enabled: !!pubkey,
-    queryFn: async (c) => {
+    queryFn: async ({ pageParam, signal: querySignal }) => {
       if (!pubkey) return [];
 
-      const signal = AbortSignal.any([c.signal, AbortSignal.timeout(10000)]);
+      const signal = AbortSignal.any([querySignal, AbortSignal.timeout(10000)]);
       
-      // Query for zap receipts (kind 9735) for this user
-      const zapReceipts = await nostr.query([
-        {
-          kinds: [9735],
-          '#p': [pubkey],
-          limit: 100,
-        }
-      ], { signal });
+      // Query for zap receipts (kind 9735) for this user with pagination
+      const filter: NostrFilter = {
+        kinds: [9735],
+        '#p': [pubkey],
+        limit: 20, // Reasonable page size for pagination
+      };
+      
+      // Add until parameter for pagination (timestamp-based)
+      if (pageParam) {
+        filter.until = pageParam;
+      }
+      
+      const zapReceipts = await nostr.query([filter], { signal });
 
       const zapsWithMessages: ZapWithMessage[] = [];
 
@@ -76,8 +81,18 @@ export function useUserZaps(pubkey: string | undefined) {
       }
 
       // Sort by timestamp (newest first)
+      console.log(`📥 Page loaded: ${zapsWithMessages.length} zaps`, { pageParam, pubkey });
       return zapsWithMessages.sort((a, b) => b.timestamp - a.timestamp);
     },
+    getNextPageParam: (lastPage) => {
+      // If no events in last page, no more pages
+      if (!lastPage || lastPage.length === 0) return undefined;
+      
+      // Use the oldest event's timestamp minus 1 as the next page param
+      const oldestEvent = lastPage[lastPage.length - 1];
+      return oldestEvent.timestamp - 1;
+    },
+    initialPageParam: undefined,
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // 1 minute
   });
