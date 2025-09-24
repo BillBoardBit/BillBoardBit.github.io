@@ -196,7 +196,7 @@ export function useZaps(
 
       const zapRequest = nip57.makeZapRequest({
         profile: actualTarget.pubkey,
-        event: actualTarget, // Pass the full event object - makeZapRequest handles the correct tag creation internally
+        event: actualTarget.id, 
         amount: zapAmount,
         relays: [config.relayUrl],
         comment
