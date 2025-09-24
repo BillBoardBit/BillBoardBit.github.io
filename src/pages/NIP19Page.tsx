@@ -1,10 +1,12 @@
 import { nip19 } from 'nostr-tools';
 import { useParams } from 'react-router-dom';
 import { useAuthor } from '@/hooks/useAuthor';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useSeoMeta } from '@unhead/react';
 import { UserQRCode } from '@/components/UserQRCode';
 import { ZapList } from '@/components/ZapList';
 import { ZapButton } from '@/components/ZapButton';
+import { LoginArea } from '@/components/auth/LoginArea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import { genUserName } from '@/lib/genUserName';
 import NotFound from './NotFound';
 
 function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
+  const { user } = useCurrentUser();
   const author = useAuthor(pubkey);
   const metadata = author.data?.metadata;
   
@@ -72,18 +75,29 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
             </CardHeader>
           </Card>
 
-          {/* Call to Action - Send Zap */}
+          {/* Call to Action */}
           <Card className="bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
             <CardContent className="p-6 text-center">
               <h3 className="text-xl font-semibold mb-2">Support {displayName}</h3>
-              <p className="text-muted-foreground mb-4">
-                Send a Lightning zap with a message to show your support
-              </p>
-              <ZapButton 
-                target={zapTarget} 
-                className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 text-lg mx-auto w-fit min-w-64"
-                showCount={false}
-              />
+              {user ? (
+                <>
+                  <p className="text-muted-foreground mb-4">
+                    Send a Lightning zap with a message to show your support
+                  </p>
+                  <ZapButton 
+                    target={zapTarget} 
+                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 text-lg mx-auto w-fit min-w-64"
+                    showCount={false}
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-muted-foreground mb-4">
+                    Login to send zaps and messages
+                  </p>
+                  <LoginArea className="flex justify-center" />
+                </>
+              )}
             </CardContent>
           </Card>
 
