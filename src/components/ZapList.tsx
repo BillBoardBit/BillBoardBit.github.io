@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useUserZaps, type ZapWithMessage } from '@/hooks/useUserZaps';
+import { useRealTimeZaps } from '@/hooks/useRealTimeZaps';
 import { useAuthor } from '@/hooks/useAuthor';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -64,6 +65,9 @@ export function ZapList({ pubkey, className }: ZapListProps) {
     hasNextPage, 
     isFetchingNextPage 
   } = useUserZaps(pubkey);
+
+  // Enable real-time zap updates
+  const { lastUpdate } = useRealTimeZaps(pubkey);
 
   // Intersection observer for infinite scroll
   const { ref, inView } = useInView();
@@ -137,9 +141,19 @@ export function ZapList({ pubkey, className }: ZapListProps) {
 
   return (
     <div className={className}>
-      <h2 className="text-lg font-semibold mb-4 flex items-center space-x-2">
-        <Zap className="w-5 h-5" />
-        <span>Zaps & Messages ({zaps.length})</span>
+      <h2 className="text-lg font-semibold mb-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Zap className="w-5 h-5" />
+          <span>Zaps & Messages ({zaps.length})</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Live updates active" />
+          {lastUpdate && (
+            <span className="text-xs text-muted-foreground">
+              Updated {lastUpdate.toLocaleTimeString()}
+            </span>
+          )}
+        </div>
       </h2>
       <div className="space-y-4">
         {zaps.map((zap) => (

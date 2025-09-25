@@ -93,7 +93,8 @@ export function useUserZaps(pubkey: string | undefined) {
       return oldestEvent.timestamp - 1;
     },
     initialPageParam: undefined,
-    staleTime: 30000, // 30 seconds
-    refetchInterval: 60000, // 1 minute
+    staleTime: 5000, // 5 seconds
+    refetchInterval: 10000, // 10 seconds - more frequent updates for real-time feel
+    refetchIntervalInBackground: true, // Keep updating even when tab is not active
   });
 }

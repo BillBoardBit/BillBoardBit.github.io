@@ -51,7 +51,7 @@ export function ZapButton({
           ) : showCount && totalSats > 0 ? (
             `${totalSats.toLocaleString()} sats`
           ) : (
-            'Send Zap & Message'
+            'Zap'
           )}
         </span>
       </div>
