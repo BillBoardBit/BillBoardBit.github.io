@@ -11,13 +11,15 @@ interface ZapButtonProps {
   className?: string;
   showCount?: boolean;
   zapData?: { count: number; totalSats: number; isLoading?: boolean };
+  minimumAmount?: number;
 }
 
 export function ZapButton({
   target,
   className = "text-xs ml-1",
   showCount = true,
-  zapData: externalZapData
+  zapData: externalZapData,
+  minimumAmount
 }: ZapButtonProps) {
   const { user } = useCurrentUser();
   const { data: author } = useAuthor(target?.pubkey || '');
@@ -40,7 +42,7 @@ export function ZapButton({
   const showLoading = externalZapData?.isLoading || isLoading;
 
   return (
-    <ZapDialog target={target}>
+    <ZapDialog target={target} minimumAmount={minimumAmount}>
       <div className={`flex items-center gap-2 cursor-pointer ${className}`}>
         <Zap className="h-5 w-5 fill-current" />
         <span>

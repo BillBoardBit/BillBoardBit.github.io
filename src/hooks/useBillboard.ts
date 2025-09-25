@@ -45,16 +45,27 @@ export function useBillboard() {
 
   // Mutation to add user to billboard
   const addToBillboard = useMutation({
-    mutationFn: async ({ npub, displayName }: { npub: string; displayName?: string }) => {
+    mutationFn: async ({ npub, displayName, minimumZapAmount }: { 
+      npub: string; 
+      displayName?: string; 
+      minimumZapAmount?: number;
+    }) => {
       if (!user) throw new Error('User must be logged in');
+
+      const content: Record<string, unknown> = {
+        npub,
+        displayName: displayName || '',
+        addedAt: Math.floor(Date.now() / 1000),
+      };
+
+      // Only add minimumZapAmount if it's provided and greater than 0
+      if (minimumZapAmount && minimumZapAmount > 0) {
+        content.minimumZapAmount = minimumZapAmount;
+      }
 
       await publishEvent({
         kind: 30078,
-        content: JSON.stringify({
-          npub,
-          displayName: displayName || '',
-          addedAt: Math.floor(Date.now() / 1000),
-        }),
+        content: JSON.stringify(content),
         tags: [
           ['d', user.pubkey], // Use pubkey as identifier
           ['t', 'BillboardBit'],
@@ -97,4 +108,44 @@ export function useBillboard() {
     isLoading: query.isLoading,
     error: query.error,
   };
+}
+
+/**
+ * Hook to get billboard information for a specific user
+ */
+export function useUserBillboard(pubkey: string | undefined) {
+  const { nostr } = useNostr();
+
+  return useQuery({
+    queryKey: ['user-billboard', pubkey],
+    enabled: !!pubkey,
+    queryFn: async (c) => {
+      if (!pubkey) return null;
+
+      const signal = AbortSignal.any([c.signal, AbortSignal.timeout(5000)]);
+      const events = await nostr.query([
+        {
+          kinds: [30078],
+          authors: [pubkey],
+          '#t': ['BillboardBit'],
+          limit: 1,
+        }
+      ], { signal });
+
+      if (events.length === 0) return null;
+
+      const event = events[0];
+      try {
+        const content = JSON.parse(event.content || '{}');
+        return {
+          ...content,
+          eventId: event.id,
+          createdAt: event.created_at,
+        };
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 300000, // 5 minutes
+  });
 }

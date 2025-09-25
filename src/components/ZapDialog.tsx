@@ -38,6 +38,7 @@ interface ZapDialogProps {
   target: Event;
   children?: React.ReactNode;
   className?: string;
+  minimumAmount?: number;
 }
 
 const presetAmounts = [
@@ -63,6 +64,7 @@ interface ZapContentProps {
   setComment: (comment: string) => void;
   inputRef: React.RefObject<HTMLInputElement>;
   zap: (amount: number, comment: string) => void;
+  minimumAmount?: number;
 }
 
 // Moved ZapContent outside of ZapDialog to prevent re-renders causing focus loss
@@ -81,6 +83,7 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
   setComment,
   inputRef,
   zap,
+  minimumAmount,
 }, ref) => (
   <div ref={ref}>
     {invoice ? (
@@ -172,6 +175,13 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
     ) : (
       <>
         <div className="grid gap-3 px-4 py-4 w-full overflow-hidden">
+          {minimumAmount && minimumAmount > 0 && (
+            <div className="text-center p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                ⚡ Suggested minimum: <strong>{minimumAmount.toLocaleString()} sats</strong>
+              </p>
+            </div>
+          )}
           <ToggleGroup
             type="single"
             value={String(amount)}
@@ -182,16 +192,25 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
             }}
             className="grid grid-cols-5 gap-1 w-full"
           >
-            {presetAmounts.map(({ amount: presetAmount, icon: Icon }) => (
-              <ToggleGroupItem
-                key={presetAmount}
-                value={String(presetAmount)}
-                className="flex flex-col h-auto min-w-0 text-xs px-1 py-2"
-              >
-                <Icon className="h-4 w-4 mb-1" />
-                <span className="truncate">{presetAmount}</span>
-              </ToggleGroupItem>
-            ))}
+            {presetAmounts.map(({ amount: presetAmount, icon: Icon }) => {
+              const isBelow = minimumAmount && presetAmount < minimumAmount;
+              return (
+                <ToggleGroupItem
+                  key={presetAmount}
+                  value={String(presetAmount)}
+                  className={cn(
+                    "flex flex-col h-auto min-w-0 text-xs px-1 py-2 relative",
+                    isBelow && "opacity-50"
+                  )}
+                >
+                  <Icon className="h-4 w-4 mb-1" />
+                  <span className="truncate">{presetAmount}</span>
+                  {isBelow && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full" />
+                  )}
+                </ToggleGroupItem>
+              );
+            })}
           </ToggleGroup>
           <div className="flex items-center gap-2">
             <div className="h-px flex-1 bg-muted" />
@@ -235,14 +254,17 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
 ZapContent.displayName = 'ZapContent';
 
 
-export function ZapDialog({ target, children, className }: ZapDialogProps) {
+export function ZapDialog({ target, children, className, minimumAmount }: ZapDialogProps) {
   const [open, setOpen] = useState(false);
   const { user } = useCurrentUser();
   const { data: author } = useAuthor(target.pubkey);
   const { toast } = useToast();
   const { webln, activeNWC, hasWebLN, detectWebLN } = useWallet();
   const { zap, isZapping, invoice, setInvoice } = useZaps(target, webln, activeNWC, () => setOpen(false));
-  const [amount, setAmount] = useState<number | string>(100);
+  
+  // Use minimum amount if provided, otherwise default to 100
+  const defaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 100;
+  const [amount, setAmount] = useState<number | string>(defaultAmount);
   const [comment, setComment] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
@@ -353,6 +375,7 @@ export function ZapDialog({ target, children, className }: ZapDialogProps) {
     setComment,
     inputRef,
     zap,
+    minimumAmount,
   };
 
   if (!user || user.pubkey === target.pubkey || !author?.metadata?.lud06 && !author?.metadata?.lud16) {

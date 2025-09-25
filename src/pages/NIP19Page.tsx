@@ -2,6 +2,7 @@ import { nip19 } from 'nostr-tools';
 import { useParams } from 'react-router-dom';
 import { useAuthor } from '@/hooks/useAuthor';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useUserBillboard } from '@/hooks/useBillboard';
 import { useSeoMeta } from '@unhead/react';
 import { UserQRCode } from '@/components/UserQRCode';
 import { ZapList } from '@/components/ZapList';
@@ -17,6 +18,7 @@ import NotFound from './NotFound';
 function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
   const { user } = useCurrentUser();
   const author = useAuthor(pubkey);
+  const { data: billboardInfo } = useUserBillboard(pubkey);
   const metadata = author.data?.metadata;
   
   const displayName = metadata?.name || genUserName(pubkey);
@@ -58,6 +60,7 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
                 target={zapTarget} 
                 className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-6 rounded-lg"
                 showCount={false}
+                minimumAmount={billboardInfo?.minimumZapAmount}
               />
             )}
           </div>

@@ -22,6 +22,7 @@ export function BillboardManager() {
   } = useBillboard();
   
   const [displayName, setDisplayName] = useState('');
+  const [minimumZapAmount, setMinimumZapAmount] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleAddToBillboard = async () => {
@@ -31,9 +32,11 @@ export function BillboardManager() {
       await addToBillboard.mutateAsync({
         npub: nip19.npubEncode(user.pubkey),
         displayName,
+        minimumZapAmount: minimumZapAmount ? parseInt(minimumZapAmount) : undefined,
       });
       setIsDialogOpen(false);
       setDisplayName('');
+      setMinimumZapAmount('');
     } catch (error) {
       console.error('Failed to add to billboard:', error);
     }
@@ -108,6 +111,21 @@ export function BillboardManager() {
                       className="mt-1"
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="minimumZapAmount">Minimum Zap Amount (sats)</Label>
+                    <Input
+                      id="minimumZapAmount"
+                      type="number"
+                      min="1"
+                      value={minimumZapAmount}
+                      onChange={(e) => setMinimumZapAmount(e.target.value)}
+                      placeholder="e.g. 21, 100, 1000 (optional)"
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Set a minimum amount for zaps. Supporters can still send any amount, but this shows your preferred minimum.
+                    </p>
+                  </div>
                   <div className="flex justify-end space-x-2">
                     <Button
                       variant="outline"
@@ -156,6 +174,7 @@ function BillboardItem({ entry }: BillboardItemProps) {
   const displayName = content.displayName || metadata?.name || genUserName(entry.pubkey);
   const npub = content.npub;
   const profileImage = metadata?.picture;
+  const minimumZapAmount = content.minimumZapAmount;
 
   return (
     <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer">
@@ -171,6 +190,12 @@ function BillboardItem({ entry }: BillboardItemProps) {
             
             <div className="space-y-2">
               <h3 className="font-semibold text-lg">{displayName}</h3>
+              {minimumZapAmount && (
+                <div className="flex items-center justify-center space-x-1 text-sm text-yellow-600 dark:text-yellow-400">
+                  <span>⚡</span>
+                  <span>Min: {minimumZapAmount.toLocaleString()} sats</span>
+                </div>
+              )}
               {content.addedAt && (
                 <p className="text-sm text-muted-foreground">
                   Added {new Date(content.addedAt * 1000).toLocaleDateString()}
