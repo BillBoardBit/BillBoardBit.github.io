@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { QrCode, Smartphone, X, Zap } from 'lucide-react';
+import { QrCode, Smartphone, X, Zap as _Zap } from 'lucide-react';
 import { useZaps } from '@/hooks/useZaps';
 import { useWallet } from '@/hooks/useWallet';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -17,12 +17,12 @@ interface UserQRCodeProps {
 
 export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProps) {
   const [isQRVisible, setIsQRVisible] = useState(false);
-  const [isPaymentQRVisible, setIsPaymentQRVisible] = useState(false);
+  const [_isPaymentQRVisible, _setIsPaymentQRVisible] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
-  const [paymentQrDataUrl, setPaymentQrDataUrl] = useState<string | null>(null);
+  const [_paymentQrDataUrl, _setPaymentQrDataUrl] = useState<string | null>(null);
 
   // Get current user and wallet info
-  const { user } = useCurrentUser();
+  const { user: _user } = useCurrentUser();
   const { webln, activeNWC } = useWallet();
 
   // Decode npub to get pubkey for creating a dummy target event
@@ -47,13 +47,13 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
   }), [pubkey]);
 
   // Use zaps hook for payment QR generation
-  const { zap, isZapping, invoice } = useZaps(dummyTarget, webln, activeNWC);
+  const { zap, isZapping: _isZapping, invoice } = useZaps(dummyTarget, webln, activeNWC);
 
   // Generate payment QR when we have an invoice
   useEffect(() => {
     const generatePaymentQR = async () => {
       if (!invoice) {
-        setPaymentQrDataUrl(null);
+        _setPaymentQrDataUrl(null);
         return;
       }
 
@@ -66,10 +66,10 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
             light: '#ffffff',
           },
         });
-        setPaymentQrDataUrl(url);
+        _setPaymentQrDataUrl(url);
       } catch (error) {
         console.error('Failed to generate payment QR code:', error);
-        setPaymentQrDataUrl(null);
+        _setPaymentQrDataUrl(null);
       }
     };
 
@@ -77,10 +77,10 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
   }, [invoice]);
 
   // Function to generate payment invoice
-  const handleGeneratePayment = () => {
+  const _handleGeneratePayment = () => {
     if (!minimumZapAmount || minimumZapAmount <= 0) return;
     
-    setIsPaymentQRVisible(true);
+    _setIsPaymentQRVisible(true);
     zap(minimumZapAmount, 'Quick zap with BillboardBit!');
   };
 
@@ -120,7 +120,8 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Quick Payment Card - Only show if user is logged in and minimum amount is set */}
+      {/* Quick Payment Card - DISABLED - Only show if user is logged in and minimum amount is set */}
+      {/* 
       {user && minimumZapAmount && minimumZapAmount > 0 && (
         <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
           <CardContent className="p-4">
@@ -189,6 +190,7 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
           </CardContent>
         </Card>
       )}
+      */}
 
       {/* Regular Profile QR Code */}
       <Card>
