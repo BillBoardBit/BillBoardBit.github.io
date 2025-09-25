@@ -49,7 +49,11 @@ This application uses:
 - **NIP-19**: Profile links and addresses
 - **NIP-57**: Lightning Network zaps
 
-See [NIP.md](./NIP.md) for detailed technical specifications.
+## Support the Developer
+
+If you find this project useful, consider supporting the developer:
+
+👉 [Support on BillboardBit](https://billboardbit.github.io/npub1epkyuxg8y9zc85xgf2hw3e9gkh5kxdecl92v6ngxjjkjglv7498sjpc9nd)
 
 ## License
 
