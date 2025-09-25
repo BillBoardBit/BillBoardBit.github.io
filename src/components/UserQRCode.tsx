@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import QRCode from 'qrcode';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,10 @@ import { QrCode, Smartphone, X, Zap as _Zap } from 'lucide-react';
 import { useZaps } from '@/hooks/useZaps';
 import { useWallet } from '@/hooks/useWallet';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useZapReceiptListener } from '@/hooks/useZapReceiptListener';
+import { useToast } from '@/hooks/useToast';
 import { nip19 } from 'nostr-tools';
+import type { NostrEvent } from '@nostrify/nostrify';
 
 interface UserQRCodeProps {
   npub: string;
@@ -20,10 +23,17 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
   const [_isPaymentQRVisible, _setIsPaymentQRVisible] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [_paymentQrDataUrl, _setPaymentQrDataUrl] = useState<string | null>(null);
+  const [pendingZapRequest, setPendingZapRequest] = useState<{
+    pubkey: string;
+    amount: number;
+    eventId?: string;
+    profile?: string;
+  } | null>(null);
 
   // Get current user and wallet info
   const { user: _user } = useCurrentUser();
   const { webln, activeNWC } = useWallet();
+  const { toast } = useToast();
 
   // Decode npub to get pubkey for creating a dummy target event
   const pubkey = useMemo(() => {
@@ -46,8 +56,38 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
     sig: ''
   }), [pubkey]);
 
-  // Use zaps hook for payment QR generation
-  const { zap, isZapping: _isZapping, invoice } = useZaps(dummyTarget, webln, activeNWC);
+  // Handle successful zap receipt
+  const handleZapReceiptReceived = useCallback((receipt: NostrEvent) => {
+    console.log('🎉 Zap payment confirmed!', receipt);
+    
+    // Close the payment modal
+    _setIsPaymentQRVisible(false);
+    _setPaymentQrDataUrl(null);
+    setPendingZapRequest(null);
+    
+    // Show success toast
+    toast({
+      title: 'Payment confirmed!',
+      description: 'Your zap payment has been confirmed on the network.',
+    });
+  }, [toast]);
+
+  // Listen for zap receipts when we have a pending zap request
+  useZapReceiptListener(
+    pendingZapRequest,
+    handleZapReceiptReceived,
+    pendingZapRequest !== null && _isPaymentQRVisible
+  );
+
+  // Use zaps hook for payment QR generation with custom success handler
+  const handleZapSuccess = useCallback(() => {
+    // For direct wallet payments (WebLN/NWC), close immediately
+    _setIsPaymentQRVisible(false);
+    _setPaymentQrDataUrl(null);
+    setPendingZapRequest(null);
+  }, []);
+
+  const { zap, isZapping: _isZapping, invoice } = useZaps(dummyTarget, webln, activeNWC, handleZapSuccess);
 
   // Generate payment QR when we have an invoice
   useEffect(() => {
@@ -77,12 +117,19 @@ export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProp
   }, [invoice]);
 
   // Function to generate payment invoice
-  const _handleGeneratePayment = () => {
-    if (!minimumZapAmount || minimumZapAmount <= 0) return;
+  const _handleGeneratePayment = useCallback(() => {
+    if (!minimumZapAmount || minimumZapAmount <= 0 || !pubkey) return;
+    
+    // Set up the pending zap request to listen for receipts
+    setPendingZapRequest({
+      pubkey,
+      amount: minimumZapAmount,
+      profile: pubkey, // For profile zaps, we target the pubkey directly
+    });
     
     _setIsPaymentQRVisible(true);
     zap(minimumZapAmount, 'Quick zap with BillboardBit!');
-  };
+  }, [minimumZapAmount, pubkey, zap]);
 
   const qrCodeUrl = useMemo(() => {
     try {
