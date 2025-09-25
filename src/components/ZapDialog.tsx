@@ -274,8 +274,10 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
   const { webln, activeNWC, hasWebLN, detectWebLN } = useWallet();
   const { zap, isZapping, invoice, setInvoice } = useZaps(target, webln, activeNWC, () => setOpen(false));
   
-  // Initialize with 1000 and update based on minimumAmount
-  const [amount, setAmount] = useState<number | string>(1000);
+  // Initialize with a lazy function to avoid stale closure
+  const [amount, setAmount] = useState<number | string>(() => {
+    return minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
+  });
   const [comment, setComment] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
@@ -288,13 +290,7 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
     }
   }, [target]);
 
-  // Initialize amount when dialog opens or minimumAmount changes
-  useEffect(() => {
-    if (open) {
-      const newDefaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
-      setAmount(newDefaultAmount);
-    }
-  }, [open, minimumAmount]);
+
 
   // Detect WebLN when dialog opens
   useEffect(() => {
@@ -361,18 +357,21 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
 
   useEffect(() => {
     if (open) {
-      setAmount(100);
+      // Set correct default amount when dialog opens
+      const newDefaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
+      setAmount(newDefaultAmount);
       setInvoice(null);
       setCopied(false);
       setQrCodeUrl('');
     } else {
       // Clean up state when dialog closes
-      setAmount(100);
+      const newDefaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
+      setAmount(newDefaultAmount);
       setInvoice(null);
       setCopied(false);
       setQrCodeUrl('');
     }
-  }, [open, setInvoice]);
+  }, [open, setInvoice, minimumAmount]);
 
   const handleZap = () => {
     const finalAmount = typeof amount === 'string' ? parseInt(amount, 10) : amount;
