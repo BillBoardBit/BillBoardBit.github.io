@@ -45,9 +45,7 @@ export function AccountSwitcher({ onAddAccountClick }: AccountSwitcherProps) {
       <DropdownMenuContent className='w-56 p-2 animate-scale-in'>
         <div className='font-medium text-sm px-2 py-1.5'>Switch Relay</div>
         <RelaySelector className="w-full" />
-        <DropdownMenuSeparator />
-        <div className='font-medium text-sm px-2 py-1.5'>Switch Account</div>
-        {otherUsers.map((user) => (
+          {otherUsers.map((user) => (
           <DropdownMenuItem
             key={user.id}
             onClick={() => setLogin(user.id)}

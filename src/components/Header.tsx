@@ -8,7 +8,9 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Title */}
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold">BillboardBit</h1>
+            <a href="/" className="text-xl font-bold hover:text-primary transition-colors">
+              BillboardBit
+            </a>
           </div>
 
           {/* Right side - Login and Theme Toggle */}
