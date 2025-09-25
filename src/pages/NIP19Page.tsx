@@ -67,34 +67,32 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
 
           {/* Profile Card */}
           <Card>
-            <CardHeader>
-              <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
-                <Avatar className="w-20 h-20">
+            <CardHeader className="p-4">
+              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center space-y-3 md:space-y-0 md:space-x-4">
+                <Avatar className="w-16 h-16 md:w-20 md:h-20 shrink-0">
                   <AvatarImage src={profileImage} alt={displayName} />
-                  <AvatarFallback className="text-xl">
+                  <AvatarFallback className="text-lg md:text-xl font-semibold">
                     {displayName.slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <CardTitle className="text-2xl">{displayName}</CardTitle>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-xl md:text-2xl font-bold truncate">{displayName}</CardTitle>
                   {about && (
-                    <p className="text-muted-foreground mt-2">{about}</p>
+                    <p className="text-muted-foreground text-sm md:text-base mt-1 line-clamp-2">{about}</p>
                   )}
                 </div>
-                <div className="flex flex-col items-center space-y-3">
-                 </div>
               </div>
             </CardHeader>
           </Card>
 
           <div className="grid gap-6 lg:grid-cols-3">
-            {/* QR Code */}
-            <div className="lg:col-span-1">
+            {/* QR Code - Hidden on mobile */}
+            <div className="lg:col-span-1 hidden lg:block">
               <UserQRCode npub={npub} />
             </div>
 
-            {/* Zap List */}
-            <div className="lg:col-span-2">
+            {/* Zap List - Full width on mobile, 2/3 on desktop */}
+            <div className="col-span-1 lg:col-span-2">
               <ZapList pubkey={pubkey} />
             </div>
           </div>
