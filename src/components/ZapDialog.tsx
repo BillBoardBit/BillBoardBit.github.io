@@ -274,9 +274,8 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
   const { webln, activeNWC, hasWebLN, detectWebLN } = useWallet();
   const { zap, isZapping, invoice, setInvoice } = useZaps(target, webln, activeNWC, () => setOpen(false));
   
-  // Use minimum amount if provided, otherwise default to 1000 (first preset amount)
-  const defaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
-  const [amount, setAmount] = useState<number | string>(defaultAmount);
+  // Initialize with 1000 and update based on minimumAmount
+  const [amount, setAmount] = useState<number | string>(1000);
   const [comment, setComment] = useState<string>('');
   const [copied, setCopied] = useState(false);
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
@@ -288,6 +287,14 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
       setComment('Zapped with BillboardBit!');
     }
   }, [target]);
+
+  // Initialize amount when dialog opens or minimumAmount changes
+  useEffect(() => {
+    if (open) {
+      const newDefaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
+      setAmount(newDefaultAmount);
+    }
+  }, [open, minimumAmount]);
 
   // Detect WebLN when dialog opens
   useEffect(() => {
@@ -369,6 +376,18 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
 
   const handleZap = () => {
     const finalAmount = typeof amount === 'string' ? parseInt(amount, 10) : amount;
+    
+    // Prevent creating invoice if amount is below minimum
+    if (minimumAmount && minimumAmount > 0 && finalAmount < minimumAmount) {
+      toast({
+        title: "Amount too low",
+        description: `Minimum amount is ${minimumAmount} sats`,
+        variant: "destructive",
+      });
+      setAmount(minimumAmount);
+      return;
+    }
+    
     zap(finalAmount, comment);
   };
 
