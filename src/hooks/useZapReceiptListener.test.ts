@@ -10,9 +10,13 @@ const mockNostr = {
   req: mockReq,
 };
 
-vi.mock('@nostrify/react', () => ({
-  useNostr: () => ({ nostr: mockNostr }),
-}));
+vi.mock('@nostrify/react', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as Record<string, unknown>),
+    useNostr: () => ({ nostr: mockNostr }),
+  };
+});
 
 describe('useZapReceiptListener', () => {
   const mockOnReceiptReceived = vi.fn();
@@ -77,12 +81,12 @@ describe('useZapReceiptListener', () => {
   it('should call onReceiptReceived when matching zap receipt is found', async () => {
     const mockZapRequest: NostrEvent = {
       id: 'zap-request-id',
-      pubkey: testZapRequest.pubkey,
+      pubkey: 'sender-pubkey', // This is the sender's pubkey (different from recipient)
       kind: 9734,
       content: 'Quick zap with BillboardBit!',
       created_at: Math.floor(Date.now() / 1000) - 30,
       tags: [
-        ['p', testZapRequest.pubkey],
+        ['p', testZapRequest.pubkey], // This 'p' tag contains the recipient pubkey
         ['amount', '10000000'], // 10k sats in millisats
       ],
       sig: 'test-sig',
@@ -126,12 +130,12 @@ describe('useZapReceiptListener', () => {
   it('should not call onReceiptReceived for non-matching zap receipts', async () => {
     const mockZapRequest: NostrEvent = {
       id: 'zap-request-id',
-      pubkey: 'different-pubkey',
+      pubkey: 'sender-pubkey',
       kind: 9734,
       content: 'Different zap',
       created_at: Math.floor(Date.now() / 1000) - 30,
       tags: [
-        ['p', 'different-pubkey'],
+        ['p', 'different-recipient-pubkey'], // Different recipient
         ['amount', '5000000'], // Different amount
       ],
       sig: 'test-sig',

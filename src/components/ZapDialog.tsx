@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, forwardRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useCallback } from 'react';
 import { Zap, Copy, Check, ExternalLink, Sparkle, Sparkles, Star, Rocket, ArrowLeft, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,7 +31,9 @@ import { useToast } from '@/hooks/useToast';
 import { useZaps } from '@/hooks/useZaps';
 import { useWallet } from '@/hooks/useWallet';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useZapReceiptListener } from '@/hooks/useZapReceiptListener';
 import type { Event } from 'nostr-tools';
+import type { NostrEvent } from '@nostrify/nostrify';
 import QRCode from 'qrcode';
 
 interface ZapDialogProps {
@@ -272,7 +274,53 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
   const { data: author } = useAuthor(target.pubkey);
   const { toast } = useToast();
   const { webln, activeNWC, hasWebLN, detectWebLN } = useWallet();
-  const { zap, isZapping, invoice, setInvoice } = useZaps(target, webln, activeNWC, () => setOpen(false));
+  
+  // State for tracking pending zap requests
+  const [pendingZapRequest, setPendingZapRequest] = useState<{
+    pubkey: string;
+    amount: number;
+    eventId?: string;
+    profile?: string;
+  } | null>(null);
+
+  // Handle successful zap receipt from network
+  const handleZapReceiptReceived = useCallback((receipt: NostrEvent) => {
+    console.log('🎉 Zap payment confirmed in ZapDialog!', receipt);
+    
+    // Close the dialog
+    setOpen(false);
+    
+    // Clear pending zap request
+    setPendingZapRequest(null);
+    
+    // Show success toast
+    toast({
+      title: 'Payment confirmed!',
+      description: 'Your zap payment has been confirmed on the network.',
+    });
+  }, [toast]);
+
+  const { zap: originalZap, isZapping, invoice, setInvoice } = useZaps(target, webln, activeNWC, () => setOpen(false));
+
+  // Listen for zap receipts when we have an invoice and dialog is open
+  useZapReceiptListener(
+    pendingZapRequest,
+    handleZapReceiptReceived,
+    open && invoice !== null && pendingZapRequest !== null
+  );
+  
+  // Wrap the zap function to set up receipt listening
+  const zap = useCallback((amount: number, comment: string) => {
+    // Set up pending zap request for receipt listening
+    setPendingZapRequest({
+      pubkey: target.pubkey,
+      amount,
+      eventId: target.id,
+    });
+    
+    // Call the original zap function
+    originalZap(amount, comment);
+  }, [originalZap, target.pubkey, target.id]);
   
   // Initialize with a lazy function to avoid stale closure
   const [amount, setAmount] = useState<number | string>(() => {
@@ -289,6 +337,13 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
       setComment('Zapped with BillboardBit!');
     }
   }, [target]);
+
+  // Clean up pending zap request when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setPendingZapRequest(null);
+    }
+  }, [open]);
 
 
 

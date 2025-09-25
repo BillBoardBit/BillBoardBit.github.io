@@ -125,10 +125,11 @@ function verifyZapReceiptMatch(
   expectedRequest: ZapRequestData,
   receipt: NostrEvent
 ): boolean {
-  // Check if the pubkey matches
-  if (originalZapRequest.pubkey !== expectedRequest.pubkey) {
-    console.log('❌ Pubkey mismatch:', {
-      original: originalZapRequest.pubkey,
+  // Check if the recipient pubkey matches (from the 'p' tag in the zap request)
+  const recipientTag = originalZapRequest.tags?.find(tag => tag[0] === 'p');
+  if (!recipientTag || recipientTag[1] !== expectedRequest.pubkey) {
+    console.log('❌ Recipient pubkey mismatch:', {
+      original: recipientTag?.[1] || 'none',
       expected: expectedRequest.pubkey
     });
     return false;
