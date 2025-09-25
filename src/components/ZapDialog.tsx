@@ -42,11 +42,14 @@ interface ZapDialogProps {
 }
 
 const presetAmounts = [
-  { amount: 1, icon: Sparkle },
-  { amount: 50, icon: Sparkles },
-  { amount: 100, icon: Zap },
-  { amount: 250, icon: Star },
-  { amount: 1000, icon: Rocket },
+  { amount: 1000, icon: Sparkle },
+  { amount: 2000, icon: Sparkles },
+  { amount: 5000, icon: Zap },
+  { amount: 10000, icon: Star },
+  { amount: 20000, icon: Rocket },
+  { amount: 50000, icon: Sparkle },
+  { amount: 100000, icon: Sparkles },
+  { amount: 200000, icon: Zap },
 ];
 
 interface ZapContentProps {
@@ -190,7 +193,7 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
                 setAmount(parseInt(value, 10));
               }
             }}
-            className="grid grid-cols-5 gap-1 w-full"
+            className="grid grid-cols-4 gap-1 w-full"
           >
             {presetAmounts.map(({ amount: presetAmount, icon: Icon }) => {
               const isBelow = minimumAmount && presetAmount < minimumAmount;
@@ -198,13 +201,14 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
                 <ToggleGroupItem
                   key={presetAmount}
                   value={String(presetAmount)}
+                  disabled={!!isBelow}
                   className={cn(
                     "flex flex-col h-auto min-w-0 text-xs px-1 py-2 relative",
-                    isBelow && "opacity-50"
+                    isBelow && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <Icon className="h-4 w-4 mb-1" />
-                  <span className="truncate">{presetAmount}</span>
+                  <span className="truncate">{presetAmount.toLocaleString()}</span>
                   {isBelow && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full" />
                   )}
