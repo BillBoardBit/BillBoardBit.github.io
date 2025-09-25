@@ -182,7 +182,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={cn("max-w-[95vw] sm:max-w-md max-h-[90vh] max-h-[90dvh] p-0 overflow-hidden rounded-2xl overflow-y-scroll")}
+        className={cn("max-w-[95vw] sm:max-w-md max-h-[90vh] max-h-[90dvh] p-0 overflow-hidden rounded-lg overflow-y-auto")}
       >
         <DialogHeader className={cn('px-6 pt-6 pb-1 relative')}>
 
@@ -192,7 +192,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
         </DialogHeader>
         <div className='px-6 pt-2 pb-4 space-y-4 overflow-y-auto flex-1'>
           {/* Prominent Sign Up Section */}
-          <div className='relative p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-950/50 border border-blue-200 dark:border-blue-800 overflow-hidden'>
+          <div className='relative p-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-950/50 border border-blue-200 dark:border-blue-800 overflow-hidden'>
             <div className='relative z-10 text-center space-y-3'>
               <div className='flex justify-center items-center gap-2 mb-2'>
                 <Sparkles className='w-5 h-5 text-blue-600' />
@@ -205,7 +205,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
               </p>
               <Button
                 onClick={handleSignupClick}
-                className='w-full rounded-full py-3 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-105 shadow-lg border-0'
+                className='w-full rounded-md py-3 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg border-0'
               >
                 <UserPlus className='w-4 h-4 mr-2' />
                 <span>Sign Up</span>
@@ -227,7 +227,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
 
           {/* Login Methods */}
           <Tabs defaultValue={defaultTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-muted/80 rounded-lg mb-4">
+            <TabsList className="grid w-full grid-cols-3 bg-muted/80 rounded-md mb-4">
               <TabsTrigger value="extension" className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
                 <span>Extension</span>
@@ -255,7 +255,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
                 </p>
                 <div className="flex justify-center">
                   <Button
-                    className='w-full rounded-full py-4'
+                    className='w-full rounded-md py-4'
                     onClick={handleExtensionLogin}
                     disabled={isLoading}
                   >
@@ -291,7 +291,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
                 </div>
 
                 <Button
-                  className='w-full rounded-full py-3'
+                  className='w-full rounded-md py-3'
                   onClick={handleKeyLogin}
                   disabled={isLoading || !nsec.trim()}
                 >
@@ -358,7 +358,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ isOpen, onClose, onLogin, onS
 
               <div className="flex justify-center">
                 <Button
-                  className='w-full rounded-full py-4'
+                  className='w-full rounded-md py-4'
                   onClick={handleBunkerLogin}
                   disabled={isLoading || !bunkerUri.trim()}
                 >

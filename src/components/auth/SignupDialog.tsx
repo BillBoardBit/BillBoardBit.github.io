@@ -294,14 +294,14 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={cn("max-w-[95vw] sm:max-w-md max-h-[90vh] max-h-[90dvh] p-0 overflow-hidden rounded-2xl flex flex-col")}
+        className={cn("max-w-[95vw] sm:max-w-md max-h-[90vh] max-h-[90dvh] p-0 overflow-hidden rounded-lg flex flex-col")}
       >
         <DialogHeader className={cn('px-6 pt-6 pb-1 relative flex-shrink-0')}>
           <DialogTitle className={cn('font-semibold text-center text-lg')}>
             {getTitle()}
           </DialogTitle>
         </DialogHeader>
-        <div className='px-6 pt-2 pb-4 space-y-4 overflow-y-scroll flex-1'>
+        <div className='px-6 pt-2 pb-4 space-y-4 overflow-y-auto flex-1'>
           {/* Welcome Step - New engaging introduction */}
           {step === 'welcome' && (
             <div className='text-center space-y-4'>
@@ -338,7 +338,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete
 
               <div className='space-y-3'>
                 <Button
-                  className='w-full rounded-full py-6 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-105 shadow-lg'
+                  className='w-full rounded-md py-6 text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg'
                   onClick={() => setStep('generate')}
                 >
                   <LogIn className='w-5 h-5 mr-2' />
@@ -407,7 +407,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete
 
               {!isLoading && (
                 <Button
-                  className='w-full rounded-full py-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform transition-all duration-200 hover:scale-105 shadow-lg'
+                  className='w-full rounded-md py-6 text-lg font-semibold bg-gradient-to-r from-purple-600 to-blue-600 shadow-lg'
                   onClick={generateKey}
                   disabled={isLoading}
                 >
@@ -519,7 +519,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete
 
                 {/* Continue button */}
                 <Button
-                  className={`w-full rounded-full py-4 text-base font-semibold transform transition-all duration-200 shadow-lg ${
+                  className={`w-full rounded-md py-4 text-base font-semibold shadow-lg ${
                     keySecured === 'downloaded'
                       ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 dark:from-blue-950/50 dark:to-purple-950/50 hover:scale-105'
                       : 'bg-gradient-to-r from-blue-600/60 to-indigo-600/60 text-muted cursor-not-allowed'
@@ -664,7 +664,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete
               {/* Action buttons */}
               <div className='space-y-3'>
                 <Button
-                  className='w-full rounded-full py-4 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transform transition-all duration-200 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
+                  className='w-full rounded-md py-4 text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed'
                   onClick={() => finishSignup(false)}
                   disabled={isPublishing || isUploading}
                 >
@@ -683,7 +683,7 @@ const SignupDialog: React.FC<SignupDialogProps> = ({ isOpen, onClose, onComplete
 
                 <Button
                   variant='outline'
-                  className='w-full rounded-full py-3 disabled:opacity-50 disabled:cursor-not-allowed'
+                  className='w-full rounded-md py-3 disabled:opacity-50 disabled:cursor-not-allowed'
                   onClick={() => finishSignup(true)}
                   disabled={isPublishing || isUploading}
                 >

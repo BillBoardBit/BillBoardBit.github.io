@@ -32,7 +32,7 @@ export function LoginArea({ className }: LoginAreaProps) {
         <div className="flex justify-center">
           <Button
             onClick={() => setLoginDialogOpen(true)}
-            className='flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground font-medium transition-all hover:bg-primary/90 animate-scale-in'
+            className='flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium'
           >
             <User className='w-4 h-4' />
             <span className='truncate'>Log in</span>
