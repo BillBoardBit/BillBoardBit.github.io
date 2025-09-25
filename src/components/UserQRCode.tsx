@@ -3,16 +3,86 @@ import QRCode from 'qrcode';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { QrCode, Smartphone, X } from 'lucide-react';
+import { QrCode, Smartphone, X, Zap } from 'lucide-react';
+import { useZaps } from '@/hooks/useZaps';
+import { useWallet } from '@/hooks/useWallet';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { nip19 } from 'nostr-tools';
 
 interface UserQRCodeProps {
   npub: string;
   className?: string;
+  minimumZapAmount?: number;
 }
 
-export function UserQRCode({ npub, className }: UserQRCodeProps) {
+export function UserQRCode({ npub, className, minimumZapAmount }: UserQRCodeProps) {
   const [isQRVisible, setIsQRVisible] = useState(false);
+  const [isPaymentQRVisible, setIsPaymentQRVisible] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [paymentQrDataUrl, setPaymentQrDataUrl] = useState<string | null>(null);
+
+  // Get current user and wallet info
+  const { user } = useCurrentUser();
+  const { webln, activeNWC } = useWallet();
+
+  // Decode npub to get pubkey for creating a dummy target event
+  const pubkey = useMemo(() => {
+    try {
+      const decoded = nip19.decode(npub);
+      return decoded.type === 'npub' ? decoded.data : '';
+    } catch {
+      return '';
+    }
+  }, [npub]);
+
+  // Create a dummy target event for zapping
+  const dummyTarget = useMemo(() => ({
+    id: `dummy-${pubkey}`,
+    pubkey,
+    kind: 0,
+    content: '',
+    created_at: Math.floor(Date.now() / 1000),
+    tags: [],
+    sig: ''
+  }), [pubkey]);
+
+  // Use zaps hook for payment QR generation
+  const { zap, isZapping, invoice } = useZaps(dummyTarget, webln, activeNWC);
+
+  // Generate payment QR when we have an invoice
+  useEffect(() => {
+    const generatePaymentQR = async () => {
+      if (!invoice) {
+        setPaymentQrDataUrl(null);
+        return;
+      }
+
+      try {
+        const url = await QRCode.toDataURL(invoice.toUpperCase(), {
+          width: 300,
+          margin: 2,
+          color: {
+            dark: '#000000',
+            light: '#ffffff',
+          },
+        });
+        setPaymentQrDataUrl(url);
+      } catch (error) {
+        console.error('Failed to generate payment QR code:', error);
+        setPaymentQrDataUrl(null);
+      }
+    };
+
+    generatePaymentQR();
+  }, [invoice]);
+
+  // Function to generate payment invoice
+  const handleGeneratePayment = () => {
+    if (!minimumZapAmount || minimumZapAmount <= 0) return;
+    
+    setIsPaymentQRVisible(true);
+    zap(minimumZapAmount, 'Quick zap with BillboardBit!');
+  };
 
   const qrCodeUrl = useMemo(() => {
     try {
@@ -49,9 +119,81 @@ export function UserQRCode({ npub, className }: UserQRCodeProps) {
   }
 
   return (
-    <Card className={className}>
-      <CardContent className="p-4">
-        {!isQRVisible ? (
+    <div className={`space-y-4 ${className}`}>
+      {/* Quick Payment Card - Only show if user is logged in and minimum amount is set */}
+      {user && minimumZapAmount && minimumZapAmount > 0 && (
+        <Card className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-800">
+          <CardContent className="p-4">
+            {!isPaymentQRVisible || !invoice ? (
+              <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Zap className="w-5 h-5 text-yellow-600" />
+                  <span className="font-medium">Quick Zap - {minimumZapAmount.toLocaleString()} sats</span>
+                </div>
+                <Button
+                  onClick={handleGeneratePayment}
+                  disabled={isZapping}
+                  className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium"
+                  size="sm"
+                >
+                  {isZapping ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin mr-2" />
+                      Generating Invoice...
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="w-4 h-4 mr-2" />
+                      Generate Payment QR
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-3">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center space-x-2">
+                    <Zap className="w-4 h-4 text-yellow-600" />
+                    <span className="text-sm font-medium">Quick Zap</span>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      setIsPaymentQRVisible(false);
+                      setPaymentQrDataUrl(null);
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+                
+                {paymentQrDataUrl ? (
+                  <div className="relative">
+                    <img 
+                      src={paymentQrDataUrl} 
+                      alt="Payment QR Code"
+                      className="w-full max-w-[200px] h-auto rounded-lg shadow-md"
+                    />
+                  </div>
+                ) : (
+                  <Skeleton className="w-[200px] h-[200px] rounded-lg" />
+                )}
+                
+                <div className="text-center">
+                  <span className="text-sm font-medium">{minimumZapAmount.toLocaleString()} sats</span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Regular Profile QR Code */}
+      <Card>
+        <CardContent className="p-4">
+          {!isQRVisible ? (
           <Button
             onClick={() => setIsQRVisible(true)}
             variant="outline"
@@ -105,5 +247,6 @@ export function UserQRCode({ npub, className }: UserQRCodeProps) {
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }

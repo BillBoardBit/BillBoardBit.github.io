@@ -88,7 +88,7 @@ function ProfileView({ pubkey, npub }: { pubkey: string; npub: string }) {
           <div className="grid gap-6 lg:grid-cols-3">
             {/* QR Code - Hidden on mobile */}
             <div className="lg:col-span-1 hidden lg:block">
-              <UserQRCode npub={npub} />
+              <UserQRCode npub={npub} minimumZapAmount={billboardInfo?.minimumZapAmount} />
             </div>
 
             {/* Zap List - Full width on mobile, 2/3 on desktop */}
