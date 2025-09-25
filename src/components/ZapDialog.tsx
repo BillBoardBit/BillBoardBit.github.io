@@ -225,9 +225,17 @@ const ZapContent = forwardRef<HTMLDivElement, ZapContentProps>(({
             ref={inputRef}
             id="custom-amount"
             type="number"
-            placeholder="Custom amount"
+            placeholder={minimumAmount && minimumAmount > 0 ? `Min: ${minimumAmount}` : "Custom amount"}
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            min={minimumAmount && minimumAmount > 0 ? minimumAmount : 1}
+            onChange={(e) => {
+              const value = parseInt(e.target.value, 10);
+              if (minimumAmount && minimumAmount > 0 && value < minimumAmount) {
+                setAmount(minimumAmount);
+              } else {
+                setAmount(e.target.value);
+              }
+            }}
             className="w-full text-sm"
           />
           <Textarea
@@ -266,8 +274,8 @@ export function ZapDialog({ target, children, className, minimumAmount }: ZapDia
   const { webln, activeNWC, hasWebLN, detectWebLN } = useWallet();
   const { zap, isZapping, invoice, setInvoice } = useZaps(target, webln, activeNWC, () => setOpen(false));
   
-  // Use minimum amount if provided, otherwise default to 100
-  const defaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 100;
+  // Use minimum amount if provided, otherwise default to 1000 (first preset amount)
+  const defaultAmount = minimumAmount && minimumAmount > 0 ? minimumAmount : 1000;
   const [amount, setAmount] = useState<number | string>(defaultAmount);
   const [comment, setComment] = useState<string>('');
   const [copied, setCopied] = useState(false);

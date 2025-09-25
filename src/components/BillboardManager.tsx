@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { LoginArea } from '@/components/auth/LoginArea';
-import { Plus, Minus, Zap } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { useState } from 'react';
 import { genUserName } from '@/lib/genUserName';
 import { nip19 } from 'nostr-tools';
@@ -174,7 +174,6 @@ function BillboardItem({ entry }: BillboardItemProps) {
   const displayName = content.displayName || metadata?.name || genUserName(entry.pubkey);
   const npub = content.npub;
   const profileImage = metadata?.picture;
-  const minimumZapAmount = content.minimumZapAmount;
 
   return (
     <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer">
@@ -194,12 +193,6 @@ function BillboardItem({ entry }: BillboardItemProps) {
                 <p className="text-sm text-muted-foreground">
                   Added {new Date(content.addedAt * 1000).toLocaleDateString()}
                 </p>
-              )}
-              {minimumZapAmount && minimumZapAmount > 0 && (
-                <div className="flex items-center justify-center gap-1 text-xs text-yellow-600 dark:text-yellow-400">
-                  <Zap className="h-3 w-3" />
-                  <span>Min: {minimumZapAmount.toLocaleString()} sats</span>
-                </div>
               )}
             </div>
           </div>
